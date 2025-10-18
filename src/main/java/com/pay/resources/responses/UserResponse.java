@@ -1,30 +1,32 @@
-package com.pay.resources.dtos;
+package com.pay.resources.responses;
 
 import com.pay.models.enums.UserType;
 
-public class UserDTO {
-    public String id;
+public class UserResponse {
+    public Long id;
     public String name;
     public String email;
+    public String document;
     public Integer typeCode;
     public String typeDescription;
 
-    public UserDTO() {
+    public UserResponse() {
     }
 
-    public UserDTO(String id, String name, String email, UserType userType) {
+    public UserResponse(Long id, String name, String email, String document, UserType userType) {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.document = document;
         this.typeCode = userType.getCode();
         this.typeDescription = userType.getDescription();
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -42,6 +44,10 @@ public class UserDTO {
 
     public String getTypeDescription() {
         return typeDescription;
+    }
+
+    public String getDocument() {
+        return document;
     }
 
 }

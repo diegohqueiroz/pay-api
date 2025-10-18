@@ -12,7 +12,8 @@ import org.junit.jupiter.api.Test;
 import com.pay.mappers.UserMapper;
 import com.pay.models.UserEntity;
 import com.pay.models.enums.UserType;
-import com.pay.resources.dtos.UserDTO;
+import com.pay.resources.requests.UserRequest;
+import com.pay.resources.responses.UserResponse;
 
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
@@ -21,8 +22,8 @@ import jakarta.transaction.Transactional;
 
 @QuarkusTest
 public class UserServiceTest {
-    private final String USER_ID_DELETAR = "user004-4126-4ca4-a412-307c25d64499";
-    private final String USER_ID_ATUALIZAR = "user003-4126-4ca4-a412-307c25d64499";
+    private final Long USER_ID_DELETAR = 4L;
+    private final Long USER_ID_ATUALIZAR = 3l;
 
     @Inject
     UserService userService;
@@ -30,20 +31,19 @@ public class UserServiceTest {
     @Inject
     UserMapper mapper; 
 
-    private UserDTO baseUserDTO;
+    private UserRequest request;
 
     @BeforeEach
     @Transactional
     void setUp() {
-        // UserEntity.deleteAll();
 
-        baseUserDTO = new UserDTO(null, "Test User", "test@user.com", UserType.SIMPLE);
+        request = new UserRequest("Test User", "test@user.com", "12345678900",UserType.GENERAL);
     }
 
     @Test
     @Transactional
     void testCreateAndGetById() {
-        String id = userService.create(baseUserDTO);
+        Long id = userService.create(request);
 
         assertNotNull(id, "O ID deve ser gerado pelo sistema.");
         UserEntity entity = UserEntity.findById(id);
@@ -56,10 +56,10 @@ public class UserServiceTest {
     @Test
     @TestTransaction
     void testGetAll() {
-        List<UserDTO> users = userService.getAll();
+        List<UserResponse> users = userService.getAll();
         assertEquals(5, users.size());
         
-        userService.create(baseUserDTO);
+        userService.create(request);
         
         users = userService.getAll();
         
@@ -70,9 +70,9 @@ public class UserServiceTest {
     @Test
     @TestTransaction
     void testUpdate() {
-        UserDTO updateDTO = new UserDTO(USER_ID_ATUALIZAR, "Updated Name", "new@email.com", UserType.SIMPLE);
+        UserRequest request = new UserRequest("Updated Name", "new@email.com", "12345678900", UserType.GENERAL);
         
-        userService.update(updateDTO, USER_ID_ATUALIZAR);
+        userService.update(request, USER_ID_ATUALIZAR);
         UserEntity entity = UserEntity.findById(USER_ID_ATUALIZAR);
         
         assertEquals("Updated Name", entity.getName());
@@ -82,11 +82,11 @@ public class UserServiceTest {
     @Test
     @TestTransaction
     void testDelete() {
-        UserDTO userDTO = userService.getById(USER_ID_DELETAR);
+        UserResponse userDTO = userService.getById(USER_ID_DELETAR);
         assertNotNull(userDTO);
         userService.delete(USER_ID_DELETAR);
 
-        UserDTO userDTOAposDelecao = userService.getById(USER_ID_DELETAR);
+        UserResponse userDTOAposDelecao = userService.getById(USER_ID_DELETAR);
         assertNull(userDTOAposDelecao, "O usuário deve ser null após a exclusão.");
     }
 }

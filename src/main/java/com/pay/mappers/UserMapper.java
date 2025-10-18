@@ -2,38 +2,40 @@ package com.pay.mappers;
 
 import com.pay.models.UserEntity;
 import com.pay.models.enums.UserType;
-import com.pay.resources.dtos.UserDTO;
+import com.pay.resources.requests.UserRequest;
+import com.pay.resources.responses.UserResponse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class UserMapper implements Mapper<UserEntity, UserDTO> {
+public class UserMapper implements Mapper<UserEntity, UserRequest, UserResponse> {
 
     @Override
-    public UserDTO toDTO(UserEntity entity) {
+    public UserResponse toDTO(UserEntity entity) {
         if (entity == null) {
             return null;
         }
         UserType userType = UserType.toEnum(entity.getType());
         
-        return new UserDTO(
+        return new UserResponse(
             entity.getId(),
             entity.getName(),
             entity.getEmail(),
+            entity.getDocument(),
             userType
         );
     }
 
     @Override
-    public UserEntity toEntity(UserDTO dto) {
-        if (dto == null) {
+    public UserEntity toEntity(UserRequest request) {
+        if (request == null) {
             return null;
         }
         
         UserEntity entity = new UserEntity();
-        entity.setName(dto.getName());
-        entity.setEmail(dto.getEmail());
-        entity.setType(dto.getTypeCode());
+        entity.setName(request.getName());
+        entity.setEmail(request.getEmail());
+        entity.setType(request.getTypeCode());
         return entity;
     }
 }

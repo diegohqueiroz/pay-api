@@ -1,7 +1,7 @@
 package com.pay.models.enums;
 
 public enum UserType {
-    SIMPLE("Comum",1),
+    GENERAL("Comum",1),
     COMPANY("Lojista",2);
 
     private String description;

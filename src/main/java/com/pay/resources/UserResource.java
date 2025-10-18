@@ -4,7 +4,8 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.jboss.logging.Logger;
 
-import com.pay.resources.dtos.UserDTO;
+import com.pay.resources.requests.UserRequest;
+import com.pay.resources.responses.UserResponse;
 import com.pay.services.UserService;
 
 import jakarta.inject.Inject;
@@ -45,9 +46,9 @@ public class UserResource {
     description = "Retorna um usuário específico com base no ID.")
     @APIResponse(responseCode = "200", description = "Operação bem-sucedida")
     @APIResponse(responseCode = "422", description = "Erro de negocio")
-    public Response get(@PathParam("id") String id) {
+    public Response get(@PathParam("id") Long id) {
         LOG.debugf("[get] {0}", id);
-        UserDTO user = service.getById(id);
+        UserResponse user = service.getById(id);
         if (user == null) {
             return Response.status(Response.Status.NOT_FOUND).build(); 
         }
@@ -61,12 +62,12 @@ public class UserResource {
                description = "Cria um novo usuário no sistema.")
     @APIResponse(responseCode = "201", description = "Usuário criado com sucesso")
     @APIResponse(responseCode = "422", description = "Erro de validação")
-    public Response create(UserDTO userDTO) {
-        LOG.debugf("[create] {0}", userDTO.getName());
+    public Response create(UserRequest request) {
+        LOG.debugf("[create] {0}", request.getName());
         
-        String id = service.create(userDTO);
+        Long id = service.create(request);
         
-        return Response.created(UriBuilder.fromResource(UserResource.class).path(id).build()).build();
+        return Response.created(UriBuilder.fromResource(UserResource.class).path(id.toString()).build()).build();
     }
 
     @PUT
@@ -77,12 +78,12 @@ public class UserResource {
     @APIResponse(responseCode = "200", description = "Usuário atualizado com sucesso")
     @APIResponse(responseCode = "404", description = "Usuário não encontrado para atualizar")
     @APIResponse(responseCode = "422", description = "Erro de validação")
-    public Response update(UserDTO userDTO, @PathParam("id") String id) {
-        LOG.debugf("[update] {0}", userDTO.getName());
+    public Response update(UserRequest request, @PathParam("id") Long id) {
+        LOG.debugf("[update] {0}", request.getName());
         
-        service.update(userDTO, id);
+        service.update(request, id);
         
-        return Response.ok(UriBuilder.fromResource(UserResource.class).path(id).build()).build();
+        return Response.ok(UriBuilder.fromResource(UserResource.class).path(id.toString()).build()).build();
     }
 
     @DELETE
@@ -91,7 +92,7 @@ public class UserResource {
                description = "Deletar um usuário específico com base no ID.")
     @APIResponse(responseCode = "204", description = "Usuário deleta com sucesso")
     @APIResponse(responseCode = "422", description = "Erro de validação")
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") Long id) {
         LOG.debugf("[delete] {0}", id);
         
         service.delete(id);

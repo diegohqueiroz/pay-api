@@ -4,13 +4,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public interface Mapper<E, D> {
+public interface Mapper<E, D, F> {
     
-    D toDTO(E entity);
+    F toDTO(E entity);
     
     E toEntity(D dto);
     
-    default List<D> toDTOList(List<E> entities) {
+    default List<F> toDTOList(List<E> entities) {
         if (entities == null) {
             return List.of();
         }

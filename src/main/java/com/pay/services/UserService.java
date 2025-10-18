@@ -1,10 +1,13 @@
 package com.pay.services;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.pay.mappers.UserMapper;
+import com.pay.models.AccountEntity;
 import com.pay.models.UserEntity;
-import com.pay.resources.dtos.UserDTO;
+import com.pay.resources.requests.UserRequest;
+import com.pay.resources.responses.UserResponse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,32 +18,36 @@ public class UserService {
     @Inject
     UserMapper mapper;
 
-    public List<UserDTO> getAll(){
+    public List<UserResponse> getAll(){
         return mapper.toDTOList(UserEntity.listAll());
     }
 
-    public UserDTO getById(String id){
+    public UserResponse getById(Long id){
         return mapper.toDTO(UserEntity.findById(id));
     }
 
     @Transactional
-    public String create(UserDTO user){
-        UserEntity entity = mapper.toEntity(user);
+    public Long create(UserRequest request){
+        UserEntity entity = mapper.toEntity(request);
         entity.persistAndFlush();
+        AccountEntity accountEntity  = new AccountEntity();
+        accountEntity.setUser(entity);
+        accountEntity.setBalance(BigDecimal.ZERO);
+        accountEntity.persistAndFlush();
         return entity.getId();
     }
 
     @Transactional
-    public void update(UserDTO user, String id){
+    public void update(UserRequest request, Long id){
         UserEntity entity = UserEntity.findById(id);
-        entity.setName(user.getName());
-        entity.setEmail(user.getEmail());
-        entity.setType(user.getTypeCode());
+        entity.setName(request.getName());
+        entity.setEmail(request.getEmail());
+        entity.setType(request.getTypeCode());
         entity.persistAndFlush();
     }
 
     @Transactional
-    public void delete(String id){
+    public void delete(Long id){
         UserEntity user = UserEntity.findById(id);
         user.delete();
     } 
