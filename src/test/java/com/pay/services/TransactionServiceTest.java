@@ -20,8 +20,10 @@ import com.pay.models.TransactionEntity;
 import com.pay.models.UserEntity;
 import com.pay.models.enums.TransactionType;
 import com.pay.models.enums.UserType;
+import com.pay.resources.requests.MovimentRequest;
 import com.pay.resources.requests.TransferRequest;
 
+import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 
@@ -36,6 +38,8 @@ public class TransactionServiceTest {
     private AccountEntity payeeAccount;
     private UserEntity payerUser;
     private UserEntity payeeUser;
+    private MovimentRequest validMovimentRequest;
+    private MovimentRequest invalidMovimentRequest;
 
     @BeforeEach
     void setUp() {
@@ -56,14 +60,18 @@ public class TransactionServiceTest {
         payeeAccount.setUser(payeeUser);
         
         validRequest = new TransferRequest();
-        validRequest.setPayer(10L);
-        validRequest.setPayee(20L);
+        validRequest.setPayer(1L);
+        validRequest.setPayee(2L);
         validRequest.setValue(new BigDecimal("150.00"));
 
         invalidRequest = new TransferRequest();
         invalidRequest.setPayer(99L);
         invalidRequest.setPayee(10L);
         invalidRequest.setValue(new BigDecimal("10.00"));
+
+        validMovimentRequest = new MovimentRequest(new BigDecimal("100.00"), 1);
+
+        invalidMovimentRequest = new MovimentRequest(new BigDecimal("10.00"), 99);
     }
 
     @Test
@@ -182,7 +190,7 @@ public class TransactionServiceTest {
     @DisplayName("Autorização deve falhar quando AutorizationClient lança WebApplicationException")
     void testAutorization_Failure() {
         TransactionException exception = assertThrows(TransactionException.class, () -> {
-            service.autorization(validRequest.getPayer());
+            service.autorization(invalidRequest.getPayer());
         });
 
         assertEquals("Transferencia não autorizada", exception.getMessage());
@@ -192,10 +200,132 @@ public class TransactionServiceTest {
     @DisplayName("Autorização deve passar quando AutorizationClient não lança exceção")
     void testAutorization_Success() {
         try {
-            service.autorization(invalidRequest.getPayer());
+            service.autorization(validRequest.getPayer());
             assertTrue(true, "Não deveria ter lançado exceção de autorização.");
         } catch (TransactionException e) {
             fail("Deveria ter passado na autorização: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("DEBIT: Deve processar o débito e atualizar o saldo com sucesso")
+    @TestTransaction
+    void testDebit_Success() {
+        String transactionId = service.debit(validMovimentRequest);
+
+        assertNotNull(transactionId, "O ID da transação não deve ser nulo");
+        
+        AccountEntity payer = AccountEntity.find("user.id", 1).firstResult();
+        assertEquals(new BigDecimal("900.00"), payer.getBalance(), "O saldo final da conta deve estar correto.");
+        
+        assertEquals(6, TransactionEntity.count(), "Deve haver uma transação persistida.");
+    }
+    
+    @Test
+    @DisplayName("DEBIT: Deve falhar se a conta não for encontrada")
+    void testDebit_AccountNotFound() {
+        
+        TransactionException exception = assertThrows(TransactionException.class, () -> {
+            service.debit(invalidMovimentRequest);
+        });
+        
+        assertEquals("Conta de origem não encontrada", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("DEBIT: Deve falhar se o saldo for insuficiente")
+    void testDebit_InsufficientBalance() {
+        validMovimentRequest.setValue(new BigDecimal("6000.00"));
+        
+        TransactionException exception = assertThrows(TransactionException.class, () -> {
+            service.debit(validMovimentRequest);
+        });
+        
+        assertEquals("Saldo insuficiente", exception.getMessage());
+    }
+    
+    @Test
+    @DisplayName("CREDIT: Deve processar o crédito e atualizar o saldo com sucesso")
+    @TestTransaction
+    void testCredit_Success() {
+        String transactionId = service.credit(validMovimentRequest);
+
+        assertNotNull(transactionId, "O ID da transação não deve ser nulo");
+        
+        AccountEntity payer = AccountEntity.find("user.id", 1).firstResult();
+        
+        assertEquals(new BigDecimal("1100.00"), payer.getBalance(), "O saldo final está correto.");
+
+        assertEquals(6, TransactionEntity.count(), "Deve haver uma transação persistida.");//Já existem 5 na carga do banco
+    }
+
+    @Test
+    @DisplayName("TRANSFER: Deve iniciar a transferência, persistir e publicar no EventBus")
+    @TestTransaction
+    void testTransfer_Flow() {
+        String transactionId = service.transfer(validRequest);
+        
+        assertNotNull(transactionId, "O ID da transação não deve ser nulo");
+    }
+    
+    @Test
+    @DisplayName("TRANSFER PERSISTENCE: Deve concluir a transferência e atualizar saldos")
+    @TestTransaction
+    void testTransferPersistence_Success() {
+        AccountEntity payer = AccountEntity.find("user.id", validRequest.getPayer()).firstResult();
+        AccountEntity payee = AccountEntity.find("user.id", validRequest.getPayee()).firstResult();
+        
+        assertEquals(new BigDecimal("1000.00"), payer.getBalance(), "O saldo inicial carregado no banco.");
+        assertEquals(new BigDecimal("2000.00"), payee.getBalance(), "O saldo inicial carregado no banco.");
+
+        String transactionId = service.transferPersistence(validRequest);
+
+        assertNotNull(transactionId, "O ID da transação não deve ser nulo");
+        
+        payer = AccountEntity.find("user.id", validRequest.getPayer()).firstResult();
+        payee = AccountEntity.find("user.id", validRequest.getPayee()).firstResult();
+        
+        assertEquals(new BigDecimal("850.00"), payer.getBalance(), "O saldo final do Payer deve estar correto.");
+        
+        assertEquals(new BigDecimal("2150.00"), payee.getBalance(), "O saldo final do Payee deve estar correto");
+
+        assertEquals(6, TransactionEntity.count(), "Deve haver uma transação persistida.");//Já tem 5 na carga do banco de dados
+    }
+
+    @Test
+    @DisplayName("validateMoviment: Deve falhar se a conta não for encontrada")
+    void testValidateMoviment_AccountNotFound() {
+        AccountEntity nonExistingAccount = null;
+        
+        TransactionException exception = assertThrows(TransactionException.class, () -> {
+            service.validateMoviment(validMovimentRequest, Optional.ofNullable(nonExistingAccount));
+        });
+        
+        assertEquals("Conta de origem não encontrada", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("validateMoviment: Deve falhar se o saldo for insuficiente")
+    void testValidateMoviment_InsufficientBalance() {
+        validMovimentRequest.setValue(new BigDecimal("6000.00"));
+        AccountEntity payer = AccountEntity.find("user.id", validMovimentRequest.getAccount()).firstResult();
+        
+        TransactionException exception = assertThrows(TransactionException.class, () -> {
+            service.validateMoviment(validMovimentRequest, Optional.of(payer));
+        });
+        
+        assertEquals("Saldo insuficiente", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("validateMoviment: Validação deve passar com dados válidos")
+    void testValidateMoviment_Success() {
+        try {
+            AccountEntity payer = AccountEntity.find("user.id", 1).firstResult();
+            service.validateMoviment(validMovimentRequest, Optional.of(payer));
+            assertTrue(true);
+        } catch (TransactionException e) {
+            fail("Não deveria ter lançado exceção com dados válidos: " + e.getMessage());
         }
     }
 }

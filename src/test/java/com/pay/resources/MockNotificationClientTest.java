@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 @Alternative
 @Priority(1)
-public class NotificationClientTest implements NotificationClient{
+public class MockNotificationClientTest implements NotificationClient{
 
     @Override
     public Uni<Response> notify(NotificationRequest request) {

@@ -55,7 +55,7 @@ public class TransactionService {
         autorization(request.getAccount());
 
         TransactionEntity transactionEntity = generateTransaction(accountEntity.get(),null, request.getValue(), TransactionType.CREDIT);
-        accountEntity.get().setBalance(debitAccount(request.getValue(), accountEntity.get().getBalance()));
+        accountEntity.get().setBalance(creditAccount(request.getValue(), accountEntity.get().getBalance()));
         
         transactionEntity.persistAndFlush();
         accountEntity.get().persistAndFlush();
@@ -78,7 +78,7 @@ public class TransactionService {
         TransactionEntity transactionEntity = generateTransaction(accountEntitySource.get(), accountEntityDestination.get(), request.getValue(), TransactionType.TRANSFER);
         transactionEntity.persistAndFlush();
 
-        accountEntitySource.get().setBalance(debitAccount(request.getValue(), accountEntityDestination.get().getBalance()));
+        accountEntitySource.get().setBalance(debitAccount(request.getValue(), accountEntitySource.get().getBalance()));
         accountEntityDestination.get().setBalance(creditAccount(request.getValue(), accountEntityDestination.get().getBalance()));
 
         accountEntitySource.get().persistAndFlush();

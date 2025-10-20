@@ -13,11 +13,11 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 @Alternative
 @Priority(1)
-public class AutorizationClientTest implements AutorizationClient{
+public class MockAutorizationClient implements AutorizationClient{
 
     @Override
     public Uni<Response> authorize(AutorizationRequest request) {
-        if(request.idAccount() == 99){
+        if(request.idAccount() != 99){
             return Uni.createFrom().item(Response.status(Response.Status.OK).build());
         }
         throw new WebApplicationException("Simulando erro de autorização");
