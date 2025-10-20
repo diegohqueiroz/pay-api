@@ -19,8 +19,10 @@ insert into accounts(id, balance, user_id) values ('account003-4126-4ca4-a412-30
 insert into accounts(id, balance, user_id) values ('account004-4126-4ca4-a412-307c25d64499', 4000 , 4);
 insert into accounts(id, balance, user_id) values ('account005-4126-4ca4-a412-307c25d64499', 5000 , 5);
 
-insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac001-4126-4ca4-a412-307c25d64499', 1000, now(), null, 'account001-4126-4ca4-a412-307c25d64499', 2);
-insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac002-4126-4ca4-a412-307c25d64499', 2000, now(), null, 'account002-4126-4ca4-a412-307c25d64499', 2);
-insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac003-4126-4ca4-a412-307c25d64499', 3000, now(), null, 'account003-4126-4ca4-a412-307c25d64499', 2);
-insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac004-4126-4ca4-a412-307c25d64499', 4000, now(), null, 'account004-4126-4ca4-a412-307c25d64499', 2);
-insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac005-4126-4ca4-a412-307c25d64499', 5000, now(), null, 'account005-4126-4ca4-a412-307c25d64499', 2);
+insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac001-4126-4ca4-a412-307c25d64499', 1000, now(), 'account001-4126-4ca4-a412-307c25d64499', null, 2);
+insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac002-4126-4ca4-a412-307c25d64499', 2000, now(), 'account002-4126-4ca4-a412-307c25d64499', null, 2);
+insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac003-4126-4ca4-a412-307c25d64499', 3000, now(), 'account003-4126-4ca4-a412-307c25d64499', null, 2);
+insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac004-4126-4ca4-a412-000000000001', 5000, now(), 'account004-4126-4ca4-a412-307c25d64499', null, 2);
+insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac004-4126-4ca4-a412-000000000002', 1000, now(), 'account004-4126-4ca4-a412-307c25d64499', 'account005-4126-4ca4-a412-307c25d64499', 1);
+insert into transactions(id, value, createdAt, account_destination_id, account_source_id, type) VALUES('transac005-4126-4ca4-a412-307c25d64499', 4000, now(), 'account005-4126-4ca4-a412-307c25d64499', null, 2);
+

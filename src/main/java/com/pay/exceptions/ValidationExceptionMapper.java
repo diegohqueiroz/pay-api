@@ -1,7 +1,5 @@
 package com.pay.exceptions;
 
-// ValidationExceptionMapper.java
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.MediaType;

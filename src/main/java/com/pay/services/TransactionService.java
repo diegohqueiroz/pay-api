@@ -36,8 +36,9 @@ public class TransactionService {
 
     @Transactional
     public String debit(MovimentRequest request){
+        final TransactionType transactionType = TransactionType.DEBIT;
         Optional<AccountEntity> accountEntity = AccountEntity.find("WHERE user.id = ?1", request.getAccount()).firstResultOptional();
-        validateMoviment(request, accountEntity);
+        validateMoviment(request, accountEntity, transactionType);
         autorization(request.getAccount());
 
         TransactionEntity transactionEntity = generateTransaction(null, accountEntity.get(), request.getValue(), TransactionType.DEBIT);
@@ -50,8 +51,9 @@ public class TransactionService {
 
     @Transactional
     public String credit(MovimentRequest request){
+        final TransactionType transactionType = TransactionType.CREDIT;
         Optional<AccountEntity> accountEntity = AccountEntity.find("WHERE user.id = ?1", request.getAccount()).firstResultOptional();
-        validateMoviment(request, accountEntity);
+        validateMoviment(request, accountEntity, transactionType);
         autorization(request.getAccount());
 
         TransactionEntity transactionEntity = generateTransaction(accountEntity.get(),null, request.getValue(), TransactionType.CREDIT);
@@ -86,11 +88,11 @@ public class TransactionService {
         return transactionEntity.getId();
     }
 
-    protected void validateMoviment(MovimentRequest request, Optional<AccountEntity> accountEntitySource) {
+    protected void validateMoviment(MovimentRequest request, Optional<AccountEntity> accountEntitySource, TransactionType transactionType){
         if (accountEntitySource.isPresent() == false) {
             throw new TransactionException("Conta de origem não encontrada");
         }
-        if (accountEntitySource.get().getBalance().compareTo(request.getValue()) < 0) {
+        if (TransactionType.DEBIT.equals(transactionType) && accountEntitySource.get().getBalance().compareTo(request.getValue()) < 0) {
             throw new TransactionException("Saldo insuficiente");
         }
     }

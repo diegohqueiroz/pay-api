@@ -218,7 +218,7 @@ public class TransactionServiceTest {
         AccountEntity payer = AccountEntity.find("user.id", 1).firstResult();
         assertEquals(new BigDecimal("900.00"), payer.getBalance(), "O saldo final da conta deve estar correto.");
         
-        assertEquals(6, TransactionEntity.count(), "Deve haver uma transação persistida.");
+        assertEquals(7, TransactionEntity.count(), "Deve haver uma transação persistida.");
     }
     
     @Test
@@ -256,7 +256,7 @@ public class TransactionServiceTest {
         
         assertEquals(new BigDecimal("1100.00"), payer.getBalance(), "O saldo final está correto.");
 
-        assertEquals(6, TransactionEntity.count(), "Deve haver uma transação persistida.");//Já existem 5 na carga do banco
+        assertEquals(7, TransactionEntity.count(), "Deve haver uma transação persistida.");//Já existem 5 na carga do banco
     }
 
     @Test
@@ -289,7 +289,7 @@ public class TransactionServiceTest {
         
         assertEquals(new BigDecimal("2150.00"), payee.getBalance(), "O saldo final do Payee deve estar correto");
 
-        assertEquals(6, TransactionEntity.count(), "Deve haver uma transação persistida.");//Já tem 5 na carga do banco de dados
+        assertEquals(7, TransactionEntity.count(), "Deve haver uma transação persistida.");//Já tem 5 na carga do banco de dados
     }
 
     @Test
@@ -298,7 +298,7 @@ public class TransactionServiceTest {
         AccountEntity nonExistingAccount = null;
         
         TransactionException exception = assertThrows(TransactionException.class, () -> {
-            service.validateMoviment(validMovimentRequest, Optional.ofNullable(nonExistingAccount));
+            service.validateMoviment(validMovimentRequest, Optional.ofNullable(nonExistingAccount), TransactionType.DEBIT);
         });
         
         assertEquals("Conta de origem não encontrada", exception.getMessage());
@@ -311,7 +311,7 @@ public class TransactionServiceTest {
         AccountEntity payer = AccountEntity.find("user.id", validMovimentRequest.getAccount()).firstResult();
         
         TransactionException exception = assertThrows(TransactionException.class, () -> {
-            service.validateMoviment(validMovimentRequest, Optional.of(payer));
+            service.validateMoviment(validMovimentRequest, Optional.of(payer), TransactionType.DEBIT);
         });
         
         assertEquals("Saldo insuficiente", exception.getMessage());
@@ -322,7 +322,7 @@ public class TransactionServiceTest {
     void testValidateMoviment_Success() {
         try {
             AccountEntity payer = AccountEntity.find("user.id", 1).firstResult();
-            service.validateMoviment(validMovimentRequest, Optional.of(payer));
+            service.validateMoviment(validMovimentRequest, Optional.of(payer), TransactionType.DEBIT);
             assertTrue(true);
         } catch (TransactionException e) {
             fail("Não deveria ter lançado exceção com dados válidos: " + e.getMessage());

@@ -34,7 +34,6 @@ public class NotificationService {
         notificationEntity.setUpdatedAt(LocalDateTime.now());
         notificationEntity.setSend(false);
         notificationEntity.setEmail(entity.getAccountDestination().getUser().getEmail());
-        notificationEntity.setEmail(entity.getAccountDestination().getUser().getEmail());
         notificationEntity.setTitle("Transferência recebida!");
         notificationEntity.setMessage(String.format("""
             ==============================================
