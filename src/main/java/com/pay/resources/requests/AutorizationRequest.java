@@ -1,5 +1,4 @@
 package com.pay.resources.requests;
 
-public class AutorizationRequest {
-    
+public record AutorizationRequest(Long idAccount) {
 }

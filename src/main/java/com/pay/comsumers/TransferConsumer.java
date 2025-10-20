@@ -23,21 +23,20 @@ public class TransferConsumer {
     @ConsumeEvent(TRANSFER_PROCESSOR_ADDRESS)
     @Blocking
     @Transactional
-    public String processTransfer(String idTransaction) {
-        LOG.info("Event Bus: Recebida requisição para processar transferência: " 
+    public Boolean processTransfer(String idTransaction) {
+        LOG.info("[processTransfer] Event Bus: Recebida requisição para processar transferência: " 
                  + idTransaction);
         
         try {
             NotificationEntity notificationEntity = notificationService.create(idTransaction); 
 
             notificationService.send(notificationEntity);
-            LOG.info("Event Bus: Transferência processada com sucesso. ID: " + idTransaction);
+            LOG.info("[processTransfer] Event Bus: Transferência processada com sucesso. ID: " + idTransaction);
             
-            return "OK";
-            
+            return  true;            
         } catch (Exception e) {
-            LOG.error("Event Bus: Falha ao processar transferência.", e);
-            return "Falha Interna: " + e.getMessage();
+            LOG.error("[processTransfer] Event Bus: Falha ao processar transferência.", e);
+            return false;
         }
     }
 }

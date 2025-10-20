@@ -1,4 +1,4 @@
-package com.pay.resources;
+package com.pay.resources.clients;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 

@@ -1,6 +1,6 @@
 package com.pay.exceptions;
 
-import java.util.Collections;
+import com.pay.resources.responses.ErrorResponse;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -14,7 +14,7 @@ public class TransactionExceptionMapper implements ExceptionMapper<TransactionEx
 
     @Override
     public Response toResponse(TransactionException exception) {
-        var errorBody = Collections.singletonMap("erro", exception.getMessage());
+        var errorBody = new ErrorResponse(HTTP_STATUS_422, exception.getMessage());
         
         return Response
             .status(HTTP_STATUS_422)

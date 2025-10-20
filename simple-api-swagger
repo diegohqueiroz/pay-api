@@ -1,0 +1,207 @@
+---
+openapi: 3.1.0
+paths:
+  /api/v1/transactions/credit:
+    post:
+      summary: Realizar um deposito.
+      description: Realizar um deposito da conta.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovimentRequest"
+        required: true
+      responses:
+        "201":
+          description: Deposito efetuado com sucesso
+        "400":
+          description: Erro na requisição
+        "422":
+          description: Erro de validação
+      tags:
+      - Transaction Resource
+  /api/v1/transactions/debit:
+    post:
+      summary: Realizar um saque.
+      description: Realizar um saque da conta.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovimentRequest"
+        required: true
+      responses:
+        "201":
+          description: Saque efetuado com sucesso
+        "400":
+          description: Erro na requisição
+        "422":
+          description: Erro de validação
+      tags:
+      - Transaction Resource
+  /api/v1/transactions/transfer:
+    post:
+      summary: Realizar uma transferencia.
+      description: Realizar uma nova transferencia entre contas.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferRequest"
+        required: true
+      responses:
+        "201":
+          description: Transferencia efetuada com sucesso
+        "422":
+          description: Erro de validação
+        "400":
+          description: Bad Request
+      tags:
+      - Transaction Resource
+  /api/v1/users:
+    put:
+      summary: Atualizar um usuário.
+      description: Atualizar um usuário específico com base no ID.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequest"
+        required: true
+      responses:
+        "200":
+          description: Usuário atualizado com sucesso
+        "404":
+          description: Usuário não encontrado para atualizar
+        "422":
+          description: Erro de validação
+        "400":
+          description: Bad Request
+      tags:
+      - User Resource
+    get:
+      summary: Retorna a lista de usuários.
+      description: Retorna a lista com todos os usuários.
+      responses:
+        "200":
+          description: Operação bem-sucedida
+        "422":
+          description: Erro de negocio
+      tags:
+      - User Resource
+    post:
+      summary: Cria um novo usuário.
+      description: Cria um novo usuário no sistema.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequest"
+        required: true
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+        "422":
+          description: Erro de validação
+        "400":
+          description: Bad Request
+      tags:
+      - User Resource
+  /api/v1/users/{idUser}/account:
+    get:
+      summary: Retorna a lista de contas de um usuário.
+      description: Retorna a lista de contas de um usuário.
+      parameters:
+      - name: idUser
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Operação bem-sucedida
+        "422":
+          description: Erro de negocio
+      tags:
+      - Account Resource
+  /api/v1/users/{id}:
+    get:
+      summary: Retorna um usuário.
+      description: Retorna um usuário específico com base no ID.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Operação bem-sucedida
+        "422":
+          description: Erro de negocio
+      tags:
+      - User Resource
+    delete:
+      summary: Deletar um usuário.
+      description: Deletar um usuário específico com base no ID.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Usuário deleta com sucesso
+        "422":
+          description: Erro de validação
+      tags:
+      - User Resource
+components:
+  schemas:
+    MovimentRequest:
+      type: object
+      required:
+      - value
+      - account
+      properties:
+        value:
+          type: number
+          minimum: 0.01
+        account:
+          type: integer
+          format: int64
+    TransferRequest:
+      type: object
+      required:
+      - value
+      - payer
+      - payee
+      properties:
+        value:
+          type: number
+          minimum: 0.01
+        payer:
+          type: integer
+          format: int64
+        payee:
+          type: integer
+          format: int64
+    UserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        document:
+          type: string
+        typeCode:
+          type: integer
+          format: int32
+info:
+  title: simple-pay API
+  version: 1.0.0-SNAPSHOT

@@ -21,7 +21,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 
-@Path("/users")
+@Path("/api/v1/users")
 public class UserResource {
     private static final Logger LOG = Logger.getLogger(UserResource.class);
 
