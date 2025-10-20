@@ -137,7 +137,7 @@ CREATE TABLE public.users (
 ## Processamento principal
 
 [src\main\java\com\pay\services\TransactionService.java](src\main\java\com\pay\services\TransactionService.java)
-``
+```java
     public String transfer(TransferRequest request){ //METODO CHAMADO PELO ENDPOINT
         String id = transferPersistence(request);// TRANSACAO DO BANCO DE DADOS ISOLADA
         LOG.debug("[transfer] id: " + id);
@@ -161,10 +161,12 @@ CREATE TABLE public.users (
         accountEntityDestination.get().persistAndFlush();//PERSISTENCIA
         return transactionEntity.getId();
     }
-``
+```
+
 Comparando com o Spring Boot com outro projeto
 https://github.com/diegohqueiroz/pay-api-spring/blob/99cbe7ac4677d9ecbf73bf2cb93766fe77a0a88a/src/main/java/com/pay/services/TransactionService.java#L82
-``
+
+```java
     @Transactional
     protected String transferPersistence(@Valid TransferRequest request){
         Optional<AccountEntity> accountEntitySource = accountRepository.findByUserId(request.getPayer());
@@ -181,7 +183,7 @@ https://github.com/diegohqueiroz/pay-api-spring/blob/99cbe7ac4677d9ecbf73bf2cb93
 
         return transactionEntity.getId();
     }
-``
+```
 
 ## Evoluções
 - A noficicações foram implementadas dentro no mesmo serviço, porém em um uso mais "real" poderia ser separada em outro microserviço e enviada via uma fila de mensageria.
